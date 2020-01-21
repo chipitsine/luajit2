@@ -1,13 +1,8 @@
-sudo: required
-dist: xenial
+dist: bionic
 
 os: linux
 
 language: c
-
-compiler:
-  - gcc
-  - clang
 
 addons:
   apt:
@@ -30,12 +25,30 @@ env:
   - JOBS=3
   - LUAJIT_PREFIX=/opt/luajit21
   - LUAJIT_SYSM_PREFIX=/opt/luajit21-sysm
-  - LUAJIT_COMMON_XCFLAGS="-DLUA_USE_APICHECK -DLUA_USE_ASSERT -DLUAJIT_NUMMODE=2 -msse4.2 -O1"
-  matrix:
-  - LUAJIT_XCFLAGS="$LUAJIT_COMMON_XCFLAGS"
-  - LUAJIT_XCFLAGS="-DLUAJIT_ENABLE_LUA52COMPAT $LUAJIT_COMMON_XCFLAGS" LUA52=1
-  - LUAJIT_XCFLAGS="-DLUAJIT_USE_VALGRIND -DLUAJIT_USE_SYSMALLOC -DLUAJIT_ENABLE_LUA52COMPAT $LUAJIT_COMMON_XCFLAGS" LUA52=1 FLAGS=-v
-  - LUAJIT_XCFLAGS="-DLUAJIT_DISABLE_GC64 -DLUAJIT_ENABLE_LUA52COMPAT $LUAJIT_COMMON_XCFLAGS" LUA52=1
+  - LUAJIT_COMMON_XCFLAGS="-DLUA_USE_APICHECK -DLUA_USE_ASSERT -DLUAJIT_NUMMODE=2 -O1"
+
+jobs:
+  include:
+  - os: linux
+    compiler: gcc
+    arch: amd64
+    env: LUAJIT_COMMON_XCFLAGS="${LUAJIT_COMMON_XCFLAGS} -msse4.2" LUAJIT_XCFLAGS="$LUAJIT_COMMON_XCFLAGS"
+
+  - os: linux
+    compiler: clang
+    arch: amd64
+    env: LUAJIT_COMMON_XCFLAGS="${LUAJIT_COMMON_XCFLAGS} -msse4.2" LUAJIT_XCFLAGS="$LUAJIT_COMMON_XCFLAGS"
+
+  - os: linux
+    compiler: gcc
+    arch: arm64
+    env: LUAJIT_XCFLAGS="$LUAJIT_COMMON_XCFLAGS"
+
+
+  - os: linux
+    compiler: clang
+    arch: arm64
+    env: LUAJIT_XCFLAGS="$LUAJIT_COMMON_XCFLAGS"
 
 install:
   - git clone https://github.com/openresty/luajit2-test-suite.git ../luajit2-test-suite
